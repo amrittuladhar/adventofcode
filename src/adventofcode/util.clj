@@ -134,6 +134,15 @@
   [pairs]
   (reduce add-pair-to-map {} pairs))
 
+(defn update-vals [map keys f]
+  "updates the map for given keys after modifying the values with f.
+  Like update-in but operating on multiple keys."
+  (reduce #(update-in % [%2] f) map keys))
+
+(defn filter-keys
+  [map pred]
+  (pairs-to-map (filter (fn [[key _]] (pred key)) map)))
+
 (defn to-int
   "Converts given item into an integer, first turning it into string"
   [s] (Integer/parseInt (str s)))
