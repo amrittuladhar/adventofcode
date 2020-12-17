@@ -28,18 +28,6 @@
   [rule value]
   (and (>= value (:min rule)) (<= value (:max rule))))
 
-(defn apply-rule-to-ticket
-  [rule ticket]
-  (loop [t ticket result {}]
-    (cond
-      (empty? t) result
-      (apply-rule rule (first t)) (recur (rest t) (update-in result [:valid] #(conj % (first t))))
-      :else (recur (rest t) (update-in result [:invalid] #(conj % (first t)))))))
-
-(defn is-valid?
-  [rule ticket]
-  (empty? (:invalid (apply-rule-to-ticket rule ticket))))
-
 (defn parse
   ([lines rules my-ticket nearby-tickets current-region]
    (let [f (first lines) r (rest lines)]
@@ -55,10 +43,6 @@
                :nearby-tickets (parse r rules my-ticket (conj nearby-tickets (parse-ticket f)) current-region)))))
   ([lines]
    (parse lines '() nil '() :rules)))
-
-(defn validate-tickets
-  [rules tickets]
-  (map (fn [ticket] (map #(apply-rule-to-ticket % ticket) rules)) tickets))
 
 (defn find-invalid-ticket-parts
   [rules ticket]
