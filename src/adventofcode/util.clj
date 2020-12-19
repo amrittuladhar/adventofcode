@@ -1,5 +1,6 @@
-(ns adventofcode.util
-  (:require [clojure.string :as str]))
+(ns adventofcode.util)
+(require '[clojure.string :as str]
+         '[clojure.math.combinatorics :as combo])
 (use 'clj-stacktrace.core)
 
 ;; ====================== utils ==================
@@ -115,6 +116,17 @@
   ([matrix-size coords]
    (adjacent-in-matrix (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
 
+;; n-dimensions
+(defn find-neighbors
+  [coords]
+  (let [num-dimensions (count coords)
+        ; build sequence of numbers that the coordinates have to be adjusted by for getting neighbors
+        ; e.g., for 2 dimensions: (-1 -1) (-1 0) (-1 1) (0 -1) (0 1) (1 0) (1 -1)
+        adjustments-base (flatten (repeat num-dimensions '(-1 0 1)))
+        all-zeros (repeat num-dimensions 0)
+        adjustments (filter #(not= % all-zeros) (combo/permuted-combinations adjustments-base num-dimensions))]
+    (map #(zip-and-reduce + coords %) adjustments)))
+
 (defn safe-predicate
   "Wraps a predicate to return false if the input is nil, or even if the predicate throws an exception"
   [predicate]
@@ -138,6 +150,8 @@
   "updates the map for given keys after modifying the values with f.
   Like update-in but operating on multiple keys."
   (reduce #(update-in % [%2] f) map keys))
+
+(defn if-nil? [value default] (if (nil? value) default value))
 
 (defn filter-keys
   [map pred]
@@ -215,6 +229,28 @@
                      (fn [sub-combination] (cons first-item sub-combination))
                      (combinations sub-seq (dec k))))
                 seq-pairs)))))
+
+;(defn permutations
+;  [seq]
+;  (let [size (count seq)]
+;    (cond
+;      (= size 0) nil
+;      (= size 1) (list seq)
+;      (= size 2) (list seq (reverse seq))
+;      :else
+;      (loop [current-outer seq
+;             result nil
+;             count 0]
+;        (recur
+;          (concat (rest current-outer) [(first current-outer)])
+;          (conj result
+;            (loop [current current-outer]
+;              (let [head (first current) tail (rest current)]
+;                (map
+;                  (fn [sub-permutation] (cons head sub-permutation))
+;                  (permutations tail))))
+;          current-outer)
+;        )))))
 
 (defn find-summing-numbers
   "Finds the smallest k numbers in the given sequence that add up to n"
