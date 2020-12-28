@@ -146,10 +146,17 @@
   [pairs]
   (reduce add-pair-to-map {} pairs))
 
-(defn update-vals [map keys f]
+(defn update-vals [map keys f & args]
   "updates the map for given keys after modifying the values with f.
   Like update-in but operating on multiple keys."
-  (reduce #(update-in % [%2] f) map keys))
+  (loop [loop-keys keys
+         loop-map map]
+    ; (printf "loop-keys: %s loop-map: %s\n" loop-keys loop-map)
+    (if (empty? loop-keys)
+      loop-map
+      (recur
+        (rest loop-keys)
+        (update-in loop-map [(first loop-keys)] #(apply f % args))))))
 
 (defn if-nil? [value default] (if (nil? value) default value))
 
