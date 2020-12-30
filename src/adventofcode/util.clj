@@ -335,3 +335,20 @@
       :else (let [diff (- desired-length length)
                   pad (repeat diff pad-char)]
               (str/join (concat pad s))))))
+
+(defn sort-map-by-values
+  [map value-comparator-fn]
+  (into (sorted-map-by (fn [key1 key2] (value-comparator-fn (map key2) (map key1)))) map))
+
+(defn sort-map-by-key-ordering
+  "Sorts map to arrange keys so they are in the order of the given sequence"
+  [map key-ordering]
+  ; first add any missing keys into key-ordering
+  (letfn [(add-rest [map key-ordering]
+            (loop [current-map map
+                   current-key-ordering key-ordering]
+              (if (empty? current-key-ordering)
+                (concat key-ordering (keys current-map))
+                (recur (dissoc current-map (first current-key-ordering)) (rest current-key-ordering)))))]
+    (let [ordering (add-rest map key-ordering)]
+      (into (sorted-map-by (fn [key1 key2] (- (.indexOf ordering key1) (.indexOf ordering key2)))) map))))

@@ -86,7 +86,7 @@
                    all-ingredients (:all-ingredients processed)
                    non-allergic-ingredients (filter (fn [[key _]] (not (contains? allergic-ingredients key))) all-ingredients)]
                (reduce (fn [sum [_ count]] (+ sum count)) 0 non-allergic-ingredients))
-      
+
       :part2 (let [resolved-allergens (resolve-allergens allergens-map)
                    sorted-by-allergen (sort-by first resolved-allergens)
                    dangerous-ingredients (map second sorted-by-allergen)]
