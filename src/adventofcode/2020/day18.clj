@@ -14,7 +14,7 @@
   (letfn [(reduce-by-op [accumulation]
             (reduce (operations-map op) accumulation))
           ; FSA with two states:
-          ;    "no-op->" = not in the desired operation
+          ;    "not-op->" = not in the desired operation
           ;    "in-op->" = in the desired operation
           (not-op-> [[_ & rs] current-expr accumulation]
             ;(printf "no-op-> head: %s current-expr: %s acc: %s\n"
