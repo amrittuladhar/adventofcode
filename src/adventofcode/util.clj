@@ -352,3 +352,7 @@
                 (recur (dissoc current-map (first current-key-ordering)) (rest current-key-ordering)))))]
     (let [ordering (add-rest map key-ordering)]
       (into (sorted-map-by (fn [key1 key2] (- (.indexOf ordering key1) (.indexOf ordering key2)))) map))))
+
+(defn logb
+  [base n]
+  (/ (Math/log n) (Math/log base)))
