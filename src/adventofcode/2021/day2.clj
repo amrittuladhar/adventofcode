@@ -19,7 +19,7 @@
       (= direction :forward) [aim (+ x value) (+ y (* aim value))]
       (= direction :down) [(+ aim value) x y]
       (= direction :up) [(- aim value) x y]
-      :else [x y])))
+      :else [aim x y])))
 
 (defn parse-line [line]
   (let [tokens (str/split line #" ")]
