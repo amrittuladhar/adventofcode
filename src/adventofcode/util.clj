@@ -166,7 +166,8 @@
 
 (defn to-int
   "Converts given item into an integer, first turning it into string"
-  [s] (Integer/parseInt (str s)))
+  ([s] (Integer/parseInt (str s)))
+  ([radix s] (Integer/parseInt (str s) radix)))
 
 (defn to-long
   "Converts given item into a long, first turning it into string"
