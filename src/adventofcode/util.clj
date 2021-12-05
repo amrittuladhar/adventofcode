@@ -101,6 +101,23 @@
   [fn & xs]
   (map #(reduce fn %) (apply zip xs)))
 
+; zips two collections, but if one of them runs out, uses the last element for the rest
+(defn zip-with-pad [coll1 coll2]
+  (loop [coll1 coll1 last-coll1 nil
+         coll2 coll2 last-coll2 nil
+         acc '()]
+    (cond
+      (and (empty? coll1) (empty? coll2)) acc
+      (empty? coll1) (recur coll1 last-coll1
+                            (rest coll2) (first coll2)
+                            (conj acc (list last-coll1 (first coll2))))
+      (empty? coll2) (recur (rest coll1) (first coll1)
+                            coll2 last-coll2
+                            (conj acc (list (first coll1) last-coll2)))
+      :else (recur (rest coll1) (first coll1)
+                   (rest coll2) (first coll2)
+                   (conj acc (list (first coll1) (first coll2)))))))
+
 (defn valid-coords?
   [max-x max-y x y]
   (and (>= x 0) (>= y 0) (<= x max-x) (<= y max-y)))
