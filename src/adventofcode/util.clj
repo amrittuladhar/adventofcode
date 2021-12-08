@@ -163,6 +163,10 @@
   [pairs]
   (reduce add-pair-to-map {} pairs))
 
+(defn reverse-map
+  [amap]
+  (pairs-to-map (map (fn [[key value]] [value key]) amap)))
+
 (defn update-vals [map keys f & args]
   "updates the map for given keys after modifying the values with f.
   Like update-in but operating on multiple keys."
