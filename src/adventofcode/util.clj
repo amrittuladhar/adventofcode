@@ -69,9 +69,11 @@
 
 (defn find-in-matrix
   "Finds an item from a matrix (vector of vectors) given its co-ordinates"
-  [mat coords]
-  (let [x (:x coords) y (:y coords)]
-    (nth (nth mat y) x)))
+  ([mat x y]
+   (find-in-matrix mat {:x x :y y}))
+  ([mat coords]
+    (let [x (:x coords) y (:y coords)]
+      (nth (nth mat y) x))))
 
 (defn count-in-matrix
   [matrix filter-fn]
@@ -121,6 +123,17 @@
 (defn valid-coords?
   [max-x max-y x y]
   (and (>= x 0) (>= y 0) (<= x max-x) (<= y max-y)))
+
+(defn adjacent-in-matrix-no-diagonals
+  "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
+  ([max-x max-y x y]
+   (let [coords (list x y)
+         directions '((-1 0) (0 -1) (0 1) (1 0))]
+     (filter
+       #(valid-coords? max-x max-y (first %) (second %))
+       (map #(zip-and-reduce + coords %) directions))))
+  ([matrix-size coords]
+   (adjacent-in-matrix (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
 
 (defn adjacent-in-matrix
   "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
