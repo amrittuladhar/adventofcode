@@ -133,7 +133,7 @@
        #(valid-coords? max-x max-y (first %) (second %))
        (map #(zip-and-reduce + coords %) directions))))
   ([matrix-size coords]
-   (adjacent-in-matrix (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
+   (adjacent-in-matrix-no-diagonals (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
 
 (defn adjacent-in-matrix
   "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
