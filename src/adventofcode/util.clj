@@ -27,6 +27,8 @@
   [filename]
   (line-seq (java.io.BufferedReader. (java.io.StringReader. (slurp filename)))))
 
+; Sequences - BEGIN
+
 (defn partition-seq
   "Creates k-sized tuples from a sequence"
   [seq k]
@@ -44,59 +46,13 @@
                 new-answers (map #(cons first %) (partition-seq rest next-k))]
             (lazy-seq (all-partitions-seq-recur rest k (concat answer new-answers))))))
 
-(defn all-partitions-seq
-  [seq k]
-  (all-partitions-seq-recur seq k '()))
-
-(defn count-letter
-  "Number of occurrences of a letter in a word"
-  [word letter]
-  (count (filter #(= letter %) word)))
-
-(defn check-character
-  "Checks if the nth character in the word is ch. False if word is shorter than n"
-  [word n ch]
-  (let [index (dec n)]
-    (cond
-      (< (count word) n) false
-      :else (= (nth word index) ch))))
-
-(defn parse-into-matrix
-  ([lines]
-   (vec (map #(vec (map identity %)) lines)))
-  ([lines fn]
-   (vec (map #(vec (map fn %)) lines))))
-
-(defn find-in-matrix
-  "Finds an item from a matrix (vector of vectors) given its co-ordinates"
-  ([mat x y]
-   (find-in-matrix mat {:x x :y y}))
-  ([mat coords]
-    (let [x (:x coords) y (:y coords)]
-      (nth (nth mat y) x))))
-
-(defn count-in-matrix
-  [matrix filter-fn]
-  (count (filter filter-fn (flatten matrix))))
-
-(defn print-matrix
-  [matrix]
-  (printf "%s \n\n" (str/join "\n" matrix))
-  matrix)
-
-(defn update-in-matrix
-  [mat coords new-value]
-  (printfv "updating %s to %s\n" coords new-value)
-  (let [x (:x coords) y (:y coords)]
-    (assoc mat y (assoc (nth mat y) x new-value))))
-
-(defn matrix-size
-  [matrix]
-  {:y (count matrix) :x (count (first matrix))})
-
 (defn zip
   [& xs]
   (apply map vector xs))
+
+(defn all-partitions-seq
+  [seq k]
+  (all-partitions-seq-recur seq k '()))
 
 (defn zip-and-reduce
   "zips given seqs and reduces them with the given fn"
@@ -120,42 +76,20 @@
                    (rest coll2) (first coll2)
                    (conj acc (list (first coll1) (first coll2)))))))
 
-(defn valid-coords?
-  [max-x max-y x y]
-  (and (>= x 0) (>= y 0) (<= x max-x) (<= y max-y)))
+; Sequences - END
 
-(defn adjacent-in-matrix-no-diagonals
-  "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
-  ([max-x max-y x y]
-   (let [coords (list x y)
-         directions '((-1 0) (0 -1) (0 1) (1 0))]
-     (filter
-       #(valid-coords? max-x max-y (first %) (second %))
-       (map #(zip-and-reduce + coords %) directions))))
-  ([matrix-size coords]
-   (adjacent-in-matrix-no-diagonals (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
+(defn count-letter
+  "Number of occurrences of a letter in a word"
+  [word letter]
+  (count (filter #(= letter %) word)))
 
-(defn adjacent-in-matrix
-  "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
-  ([max-x max-y x y]
-   (let [coords (list x y)
-         directions '((-1 -1) (-1 0) (-1 1) (0 -1) (0 1) (1 0) (1 -1) (1 1))]
-     (filter
-       #(valid-coords? max-x max-y (first %) (second %))
-       (map #(zip-and-reduce + coords %) directions))))
-  ([matrix-size coords]
-   (adjacent-in-matrix (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
-
-;; n-dimensions
-(defn find-neighbors
-  [coords]
-  (let [num-dimensions (count coords)
-        ; build sequence of numbers that the coordinates have to be adjusted by for getting neighbors
-        ; e.g., for 2 dimensions: (-1 -1) (-1 0) (-1 1) (0 -1) (0 1) (1 0) (1 -1)
-        adjustments-base (flatten (repeat num-dimensions '(-1 0 1)))
-        all-zeros (repeat num-dimensions 0)
-        adjustments (filter #(not= % all-zeros) (combo/permuted-combinations adjustments-base num-dimensions))]
-    (map #(zip-and-reduce + coords %) adjustments)))
+(defn check-character
+  "Checks if the nth character in the word is ch. False if word is shorter than n"
+  [word n ch]
+  (let [index (dec n)]
+    (cond
+      (< (count word) n) false
+      :else (= (nth word index) ch))))
 
 (defn safe-predicate
   "Wraps a predicate to return false if the input is nil, or even if the predicate throws an exception"
@@ -391,3 +325,97 @@
 (defn logb
   [base n]
   (/ (Math/log n) (Math/log base)))
+
+; Matrix operations - BEGIN
+
+(defn parse-into-matrix
+  ([lines]
+   (vec (map #(vec (map identity %)) lines)))
+  ([lines fn]
+   (vec (map #(vec (map fn %)) lines))))
+
+(defn find-in-matrix
+  "Finds an item from a matrix (vector of vectors) given its co-ordinates"
+  ([mat x y]
+   (find-in-matrix mat {:x x :y y}))
+  ([mat coords]
+   (let [x (:x coords) y (:y coords)]
+     (nth (nth mat y) x))))
+
+(defn count-in-matrix
+  [matrix filter-fn]
+  (count (filter filter-fn (flatten matrix))))
+
+(defn print-matrix
+  [matrix]
+  (printfv "%s \n\n" (str/join "\n" matrix))
+  matrix)
+
+(defn update-in-matrix-fn
+  [mat new-value-fn all-coords]
+  (printfv "updating %s\n" all-coords)
+  (cond
+    (empty? all-coords) mat
+    :else (let [coords (first all-coords)
+                x (if-nil? (:x coords) (first coords))
+                y (if-nil? (:y coords) (second coords))
+                cur-value (find-in-matrix mat x y)]
+            (recur
+              (assoc mat y (assoc (nth mat y) x (new-value-fn cur-value)))
+              new-value-fn
+              (rest all-coords)))))
+
+(defn update-in-matrix
+  [mat coords new-value]
+  (printfv "updating %s to %s\n" coords new-value)
+  (update-in-matrix-fn mat (fn [_] new-value) [coords]))
+
+(defn matrix-size
+  [matrix]
+  {:y (count matrix) :x (count (first matrix))})
+
+(defn search-matrix
+  [mat search-fn]
+  (let [y-size (count mat)
+        x-size (count (first mat))
+        all-coords (for [x (range x-size) y (range y-size)] [x y])]
+    (filter #(search-fn (find-in-matrix mat (first %) (second %))) all-coords)))
+
+(defn valid-coords?
+  [max-x max-y x y]
+  (and (>= x 0) (>= y 0) (<= x max-x) (<= y max-y)))
+
+(defn adjacent-in-matrix-no-diagonals
+  "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
+  ([max-x max-y x y]
+   (let [coords (list x y)
+         directions '((-1 0) (0 -1) (0 1) (1 0))]
+     (filter
+       #(valid-coords? max-x max-y (first %) (second %))
+       (map #(zip-and-reduce + coords %) directions))))
+  ([matrix-size coords]
+   (adjacent-in-matrix-no-diagonals (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
+
+(defn adjacent-in-matrix
+  "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
+  ([max-x max-y x y]
+   (let [coords (list x y)
+         directions '((-1 -1) (-1 0) (-1 1) (0 -1) (0 1) (1 0) (1 -1) (1 1))]
+     (filter
+       #(valid-coords? max-x max-y (first %) (second %))
+       (map #(zip-and-reduce + coords %) directions))))
+  ([matrix-size coords]
+   (adjacent-in-matrix (dec (:x matrix-size)) (dec (:y matrix-size)) (:x coords) (:y coords))))
+
+;; n-dimensions
+(defn find-neighbors
+  [coords]
+  (let [num-dimensions (count coords)
+        ; build sequence of numbers that the coordinates have to be adjusted by for getting neighbors
+        ; e.g., for 2 dimensions: (-1 -1) (-1 0) (-1 1) (0 -1) (0 1) (1 0) (1 -1)
+        adjustments-base (flatten (repeat num-dimensions '(-1 0 1)))
+        all-zeros (repeat num-dimensions 0)
+        adjustments (filter #(not= % all-zeros) (combo/permuted-combinations adjustments-base num-dimensions))]
+    (map #(zip-and-reduce + coords %) adjustments)))
+
+; MATRIX Operations - END
