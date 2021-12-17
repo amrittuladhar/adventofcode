@@ -29,6 +29,18 @@
 
 ; Sequences - BEGIN
 
+; https://groups.google.com/g/clojure-dev/c/NaAuBz6SpkY
+(defn take-upto
+  "Returns a lazy sequence of successive items from coll until
+   (pred item) returns true, including that item. pred must be
+   free of side-effects."
+  [pred coll]
+  (lazy-seq
+    (when-let [s (seq coll)]
+      (if (pred (first s))
+        (cons (first s) nil)
+        (cons (first s) (take-upto pred (rest s)))))))
+
 (defn partition-seq
   "Creates k-sized tuples from a sequence"
   [seq k]
@@ -140,6 +152,13 @@
 (defn to-long
   "Converts given item into a long, first turning it into string"
   [s] (Long/parseLong (str s)))
+
+(defn next-multiple
+  "The smallest integer >= num that's a multiple of factor"
+  [num factor]
+  (if (= (rem num factor) 0)
+    num
+    (* factor (inc (quot num factor)))))
 
 (defn regex-match?
   "Does the given string match the given regular expression?"
@@ -329,10 +348,23 @@
 ; Matrix operations - BEGIN
 
 (defn parse-into-matrix
-  ([lines]
-   (vec (map #(vec (map identity %)) lines)))
   ([lines fn]
-   (vec (map #(vec (map fn %)) lines))))
+   (vec (map #(vec (map fn %)) lines)))
+  ([lines]
+   (parse-into-matrix lines identity)))
+
+; creates a matrix as a map where keys are co-ordinates (vectors [x y]) and values are values
+; the map also contains a :size key where the value is a vector with [col-count row-count]
+(defn parse-into-matrix-map
+  ([lines]
+   (let [row-count (count lines) col-count (count (first lines))]
+     (pairs-to-map
+       (for [x (range col-count) y (range row-count)]
+         [[x y] (nth (nth lines y) x)])))))
+
+(defn matrix-map-dimensions [matrix-map]
+  [(apply max (map first (map first matrix-map)))
+   (apply max (map second (map first matrix-map)))])
 
 (defn find-in-matrix
   "Finds an item from a matrix (vector of vectors) given its co-ordinates"
