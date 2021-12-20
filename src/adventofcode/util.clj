@@ -276,6 +276,14 @@
   [degrees]
   (Math/toRadians degrees))
 
+; rounded-up and rounded-down quotients for the given division
+(defn quotient-pair [num divisor]
+  (let [q (quot num divisor)
+        r (rem num divisor)]
+    [q
+     (if (zero? r) q (inc q))
+     ]))
+
 (defn relative-to-new-origin
   "Performs fn on some coords as if they were relative to an origin other than (0, 0)"
   [coords new-origin fn]
