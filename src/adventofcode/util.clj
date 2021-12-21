@@ -386,10 +386,34 @@
   [matrix filter-fn]
   (count (filter filter-fn (flatten matrix))))
 
+(defn convert-matrix-map-to-vec
+  [matrix default-value]
+  (let [keys (keys matrix)
+        xx (map first keys) yy (map second keys)
+        max-x (apply max xx) max-y (apply max yy)
+        initial-vector (vec (repeat (inc max-y) (mapv (constantly default-value) (range (inc max-x)))))]
+    (reduce
+      (fn [v [coords value]]
+        ; (println "v:" v "coords:" coords "value:" value)
+        (update-in v (reverse coords) (constantly value)))
+      initial-vector
+      matrix)))
+
+(defn convert-matrix-to-map
+  [matrix]
+  (pairs-to-map
+    (for [y (range (dec (count matrix)))]
+      (for [x (range (dec (count (first matrix))))]
+        [[x y] (find-in-matrix matrix x y)]))))
+
 (defn print-matrix
   [matrix]
-  (printfv "%s \n\n" (str/join "\n" matrix))
+  (println (str/join \newline (map #(str/join %) matrix)))
   matrix)
+
+(defn print-matrix-map
+  [matrix-map]
+  (print-matrix (convert-matrix-map-to-vec matrix-map nil)))
 
 (defn update-in-matrix-fn
   [mat new-value-fn all-coords]
@@ -456,6 +480,6 @@
         adjustments-base (flatten (repeat num-dimensions '(-1 0 1)))
         all-zeros (repeat num-dimensions 0)
         adjustments (filter #(not= % all-zeros) (combo/permuted-combinations adjustments-base num-dimensions))]
-    (map #(zip-and-reduce + coords %) adjustments)))
+    (mapv #(apply vector (zip-and-reduce + coords %)) adjustments)))
 
 ; MATRIX Operations - END
