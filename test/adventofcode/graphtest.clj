@@ -25,7 +25,7 @@
         (get-in graph [node2 node1])))))
 
 (deftest djikstra
-  (is (= (g/djikstra-2 graph :c :e children weight)
+  (is (= (g/djikstra graph :c :e children weight)
          '([[:c :d] 2] [[:d :e] 4])))
-  (is (= (g/djikstra-2 graph :c #(= %2 :e) children weight)
+  (is (= (g/djikstra graph :c #(= %2 :e) children weight)
          '([[:c :d] 2] [[:d :e] 4]))))

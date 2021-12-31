@@ -2,22 +2,18 @@
   (:require [adventofcode.util :as u]))
 (require '[clojure.data.priority-map :refer [priority-map]])
 
-
-
 (defn real-path-with-weights [graph weight-fn reverse-path destination]
   (->> (iterate reverse-path destination)
        (take-while #(not (nil? %)))
        reverse
        (partition 2 1)
        (map (fn [[s d]] [[s d] (weight-fn graph s d)]))))
-; (reverse (take-while #(not (nil? %)) (iterate reverse-path destination))))
 
 (defn find-candidate [visited weights]
-  (first
-    (first
-      (filter
-        (fn [[node _]] (not (contains? visited node)))
-        weights))))
+  (->> weights
+       (filter (fn [[node _]] (not (contains? visited node))))
+       first
+       first))
 
 (defn add-weights [weights new-nodes]
   (reduce
@@ -47,7 +43,7 @@
     (partial destination-def graph)
     (partial = destination-def)))
 
-(defn djikstra-2
+(defn djikstra
   "Uses Djikstra's algorithm to find the shortest path between two nodes in a graph
   Arguments:
   - destination-def - either a
@@ -63,7 +59,7 @@
            weights (into (priority-map) [{src 0}])
            next src]
       (let [[candidate new-weights] (find-candidate-2 visited weights graph next children-fn)]
-        (println "checking" "candidate:" candidate "visited:" visited "weights:" new-weights)
+        ; (println "checking" "candidate:" candidate "visited:" visited "weights:" new-weights)
         (cond
           (nil? candidate) '()
           (destination-fn candidate) (real-path-with-weights graph weight-fn reverse-path candidate)
@@ -73,31 +69,5 @@
                                         (update-weights candidate (partial weight-fn graph candidate))
                                         [new-weights reverse-path]
                                         neighbors)]
-                  (println "   new" "visited:" new-visited "weights:" new-weights "neighbors:" neighbors)
+                  ; (println "   new" "visited:" new-visited "weights:" new-weights "neighbors:" neighbors)
                   (recur new-visited (second updated-weights) (first updated-weights) (first neighbors))))))))
-
-(defn djikstra
-  "Uses Djikstra's algorithm to find the shortest path between two nodes in a graph
-  Arguments:
-  - nodes-fn [graph] - fn that returns seq of all nodes in the graph
-  - weight-fn [graph node1 node2] - fn that returns the weight of the path from node1 to node2
-  - children-fn [graph node] - fn the returns the seq of children of a given node"
-  [graph src destination
-   nodes-fn children-fn weight-fn]
-  (let [all-nodes (nodes-fn graph)]
-    (loop [visited #{}
-           reverse-path {}
-           weights (into (priority-map) (map #(vector % (if (= % src) 0 Integer/MAX_VALUE)) all-nodes))]
-      (let [candidate (find-candidate visited weights)]
-        (println "checking" "candidate:" candidate "visited:" visited "weights:" weights)
-        (cond
-          (nil? candidate) '()
-          (= candidate destination) (real-path-with-weights graph weight-fn reverse-path destination)
-          :else (let [new-visited (conj visited candidate)
-                      neighbors (filter #(not (contains? visited %)) (children-fn graph candidate))
-                      new-weights (reduce
-                                    (update-weights candidate (partial weight-fn graph candidate))
-                                    [weights reverse-path]
-                                    neighbors)]
-                  (println "   new" "visited:" new-visited "weights:" new-weights)
-                  (recur new-visited (second new-weights) (first new-weights))))))))
