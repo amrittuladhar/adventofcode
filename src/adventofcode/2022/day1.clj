@@ -3,16 +3,10 @@
          '[clojure.string :as str])
 
 (defn parse [file]
-  (loop [lines (u/read-file (str "./data/2022/day1/" file ".txt"))
-         rations []
-         current []]
-    (if
-      (empty? lines)
-      rations
-      (let [line (first lines)]
-        (if (empty? line)
-          (recur (rest lines) (conj rations current) [])
-          (recur (rest lines) rations (conj current (u/to-int line))))))))
+  (as-> (slurp (str "./data/2022/day1/" file ".txt")) data
+        (str/split data #"\n\n")
+        (map #(str/split % #"\n") data)
+        (map #(map u/to-int %) data)))
 
 (defn sums [data]
   (map #(reduce + %) data))
