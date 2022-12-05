@@ -22,10 +22,24 @@
   [n]
   (str/join (repeat n "\t")))
 
+(defn line-seq-str
+  [str]
+  (->> str
+       java.io.StringReader.
+       java.io.BufferedReader.
+       line-seq))
+
+; Processing input - BEGIN
+
+(defn file-path [name year day]
+  (str "./data/" year "/day" day "/" name ".txt"))
+
 (defn read-file
   "Returns lines from a file as a seq"
   [filename]
   (line-seq (java.io.BufferedReader. (java.io.StringReader. (slurp filename)))))
+
+; Processing input - END
 
 ; Sequences - BEGIN
 
@@ -87,6 +101,9 @@
       :else (recur (rest coll1) (first coll1)
                    (rest coll2) (first coll2)
                    (conj acc (list (first coll1) (first coll2)))))))
+
+(defn zip-indexed [coll]
+  (map-indexed (fn [idx itm] [idx itm]) coll))
 
 ; Sequences - END
 
