@@ -8,9 +8,9 @@
 
 (defn find-marker [message length]
   (->> (partition length 1 message)
-      (take-while #(not (= (count %) (count (set %)))))
-      count
-      (+ length)))
+       (take-while #(not (= length (count (set %)))))
+       count
+       (+ length)))
 
 (defn part1 [file]
   (find-marker (parse file) 4))
