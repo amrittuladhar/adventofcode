@@ -463,8 +463,14 @@
     (filter #(search-fn (find-in-matrix mat (first %) (second %))) all-coords)))
 
 (defn valid-coords?
+  "0-indexed"
   [max-x max-y x y]
   (and (>= x 0) (>= y 0) (<= x max-x) (<= y max-y)))
+
+(defn inside-matrix? [matrix x y]
+  "matrix = vector of vectors"
+  (let [{max-x :x max-y :y} (matrix-size matrix)]
+    (valid-coords? (dec max-x) (dec max-y) x y)))
 
 (defn adjacent-in-matrix-no-diagonals
   "Returns a seq of all valid co-ordinates adjacent to the given co-ordinates"
