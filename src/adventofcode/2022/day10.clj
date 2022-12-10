@@ -6,9 +6,8 @@
   (update-in registers ["X"] (fn [{_ :during to :after}] {:during to :after (+ to value)})))
 
 (defn noop [last-state]
-  "Makes a copy of the last state the corrects the value of registers at the beginning of the new state"
   (-> (map
-        (fn [[register {_ :during to :after}]] [register {:during to :after to}])
+        (fn [[register {_ :during after :after}]] [register {:during after :after after}])
         last-state)
       u/pairs-to-map))
 
@@ -34,20 +33,12 @@
   (let [lines (u/read-file (str "./data/2022/day10/" file ".txt"))]
     (map parse-command lines)))
 
-(defn register-value-during [state register]
-  (:during (state register)))
-
 (defn part1 [file]
   (let [commands (parse file)]
     (as-> (execute commands {"X" {:during 1 :after 1}}) execution
-          (map #(vector
-                  %
-                  (register-value-during (execution %) "X"))
+          (map #(vector % (:during ((execution %) "X")))
                '(20 60 100 140 180 220))
-          (map #(*
-                  (first %)
-                  (second %))
-               execution)
+          (map #(* (first %) (second %)) execution)
           (reduce + execution))))
 
 ; Part 2
@@ -61,6 +52,5 @@
     (->> (for [row rows]
            (-> (for [[pixel {{during :during _ :after} "X"}] (u/zip-indexed row)]
                  (if (is-lit? pixel during) "#" "."))
-               str/join
-               ))
+               str/join))
          (str/join "\n"))))
