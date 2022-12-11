@@ -3,9 +3,10 @@
          '[clojure.string :as str])
 
 ; Notes: In order to avoid worry levels from getting so big in part 2 that operations on them take too long,
-; we take the product of the all the divisors for each monkey and always scale down worry levels using this
-; product. This works because (a) modular arithmetic is compatible with all the operations we need to support
-; (b) we don't actually need to know absolute worry levels, only how many inspections each monkey performed.
+; we take the product of the all the divisors for each monkey (GCD of the divisors would as well),
+; and always scale down worry levels using this product. This works because (a) modular arithmetic is compatible
+; with all the operations we need to support (b) we don't actually need to know absolute worry levels, only how
+; many inspections each monkey performed.
 
 (def OPS {"*" * "+" + "-" - "/" /})
 
@@ -27,7 +28,7 @@
   (let [tokens (str/split target #" ")]
     (u/to-int (last tokens))))
 
-(defn parse-test [test]
+(defn parse-divisor [test]
   ; parses "     Test: divisible by 19"
   (let [tokens (str/split test #"Test: divisible by ")
         div (u/to-int (last tokens))]
@@ -42,7 +43,7 @@
    :monkey    monkey
    :items     (parse-starting-items starting-items)
    :operation (-> operation (str/split #":") second str/trim parse-operation)
-   :div       (parse-test test)
+   :div       (parse-divisor test)
    :if-true   (parse-target if-true)
    :if-false  (parse-target if-false)
    :count     0
