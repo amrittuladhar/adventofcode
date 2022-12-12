@@ -1,5 +1,4 @@
-(ns adventofcode.graph
-  (:require [adventofcode.util :as u]))
+(ns adventofcode.graph)
 (require '[clojure.data.priority-map :refer [priority-map]])
 
 (defn real-path-with-weights [graph weight-fn reverse-path destination]
@@ -22,14 +21,17 @@
     new-nodes))
 
 (defn find-candidate-2 [visited weights graph node children-fn]
+  ; (println "find-candidate-3" "node" node)
   (let [children (children-fn graph node)
-        new-weights (add-weights weights children)]
-    [(find-candidate visited new-weights)
-     new-weights]))
+        new-weights (add-weights weights children)
+        candidate (find-candidate visited new-weights)
+        candidate-children (children-fn graph candidate)
+        new-new-weights (add-weights weights candidate-children)]
+    [candidate new-new-weights]))
 
 (defn update-weights [candidate candidate-weight-fn]
   (fn [[weights previous] neighbor]
-    ; (println "weights:" weights "neighbor:" neighbor)
+    ; (println "weights:" weights "neighbor:" neighbor "neighbor-weight" (candidate-weight-fn neighbor) "current" (weights neighbor))
     (let [current-weight (weights neighbor)
           neighbor-weight (candidate-weight-fn neighbor)
           new-estimate (+ (weights candidate) neighbor-weight)]
@@ -59,7 +61,7 @@
            weights (into (priority-map) [{src 0}])
            next src]
       (let [[candidate new-weights] (find-candidate-2 visited weights graph next children-fn)]
-        ; (println "checking" "candidate:" candidate "visited:" visited "weights:" new-weights)
+        ;(println "checking" "candidate:" candidate "visited:" visited "weights:" new-weights)
         (cond
           (nil? candidate) '()
           (destination-fn candidate) (real-path-with-weights graph weight-fn reverse-path candidate)

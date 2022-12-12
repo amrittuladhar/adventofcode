@@ -496,6 +496,7 @@
 
 ;; n-dimensions
 (defn find-neighbors
+  "Input is a vector of n values, e.g. [0 0]"
   [coords]
   (let [num-dimensions (count coords)
         ; build sequence of numbers that the coordinates have to be adjusted by for getting neighbors
