@@ -3,7 +3,7 @@
          '[clojure.string :as str])
 
 ; Notes: In order to avoid worry levels from getting so big in part 2 that operations on them take too long,
-; we take the product of the all the divisors for each monkey (GCD of the divisors would as well),
+; we take the product of the all the divisors for each monkey (LCM of the divisors would as well),
 ; and always scale down worry levels using this product. This works because (a) modular arithmetic is compatible
 ; with all the operations we need to support (b) we don't actually need to know absolute worry levels, only how
 ; many inspections each monkey performed.
