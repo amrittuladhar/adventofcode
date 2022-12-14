@@ -41,6 +41,13 @@
 
 ; Processing input - END
 
+; Numbers - BEGIN
+(defn range-inc [x y]
+  "Range of x to y or y to x, inclusive depending on which one is bigger"
+  (if
+    (> x y) (range y (inc x))
+            (range x (inc y))))
+
 ; Sequences - BEGIN
 
 ; https://groups.google.com/g/clojure-dev/c/NaAuBz6SpkY
@@ -408,7 +415,8 @@
   (let [keys (keys matrix)
         xx (map first keys) yy (map second keys)
         max-x (apply max xx) max-y (apply max yy)
-        initial-vector (vec (repeat (inc max-y) (mapv (constantly default-value) (range (inc max-x)))))]
+        initial-vector (vec
+                         (repeat (inc max-y) (mapv (constantly default-value) (range (inc max-x)))))]
     (reduce
       (fn [v [coords value]]
         ; (println "v:" v "coords:" coords "value:" value)
@@ -425,12 +433,11 @@
 
 (defn print-matrix
   [matrix]
-  (println (str/join \newline (map #(str/join %) matrix)))
-  matrix)
+  (println (str/join \newline (map #(str/join %) matrix))))
 
 (defn print-matrix-map
-  [matrix-map]
-  (print-matrix (convert-matrix-map-to-vec matrix-map nil)))
+  [matrix-map default-value]
+  (print-matrix (convert-matrix-map-to-vec matrix-map default-value)))
 
 (defn update-in-matrix-fn
   [mat new-value-fn all-coords]
