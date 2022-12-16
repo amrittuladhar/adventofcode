@@ -377,7 +377,16 @@
   [base n]
   (/ (Math/log n) (Math/log base)))
 
+(defn between? [x a b]
+  "Is x between a and b, whether a < b OR a > b ?"
+  (or
+    (and (< x a) (> x b))
+    (and (< x b) (> x a))))
+
 ; Matrix operations - BEGIN
+
+(defn manhattan-distance [[x1 y1] [x2 y2]]
+  (+ (Math/abs (- x1 x2)) (Math/abs (- y1 y2))))
 
 (defn parse-into-matrix
   ([lines fn]
@@ -435,9 +444,26 @@
   [matrix]
   (println (str/join \newline (map #(str/join %) matrix))))
 
+(defn translate-matrix-map [matrix-map xx yy]
+  (reduce
+    (fn [map [[x y] v]] (assoc map [(+ x xx) (+ y yy)] v))
+    {}
+    matrix-map))
+
+(defn translate-to-positive [matrix-map]
+  (if (empty? matrix-map)
+    {}
+    (let [min-x (apply min (map first (map first matrix-map)))
+          min-y (apply min (map second (map first matrix-map)))
+          updated-map (translate-matrix-map matrix-map (- min-x) (- min-y))]
+      updated-map)))
+
 (defn print-matrix-map
   [matrix-map default-value]
-  (print-matrix (convert-matrix-map-to-vec matrix-map default-value)))
+  (if (empty? matrix-map)
+    (println)
+    (let [updated-map (translate-to-positive matrix-map)]
+      (print-matrix (convert-matrix-map-to-vec updated-map default-value)))))
 
 (defn update-in-matrix-fn
   [mat new-value-fn all-coords]
