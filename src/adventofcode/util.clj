@@ -136,15 +136,11 @@
        (predicate %)
        (catch Exception _ false))))
 
-(defn add-pair-to-map
-  "Adds a pair to a given map"
-  [map pair]
-  (assoc map (first pair) (second pair)))
-
 (defn pairs-to-map
   "Converts sequence of pairs into a map"
   [pairs]
-  (reduce add-pair-to-map {} pairs))
+  (into {} pairs))
+  ; (reduce add-pair-to-map {} pairs))
 
 (defn reverse-map
   [amap]
@@ -278,6 +274,12 @@
         smaller-than-n (take-while #(<= % n) sorted)]
     (filter #(= (reduce + %) n) (combinations smaller-than-n k))))
 
+(defn reduce-seqs
+  [f & seqs]
+  (let [zipped (apply zip seqs)
+        map-fn (if (vector? (first seqs)) mapv map)]
+    (map-fn #(reduce f %) zipped)))
+
 (defn cartesian-to-angular
   [[x y]]
   (let [r (Math/sqrt (+ (* x x) (* y y)))
@@ -394,9 +396,8 @@
   ([lines]
    (parse-into-matrix lines identity)))
 
-; creates a matrix as a map where keys are co-ordinates (vectors [x y]) and values are values
-; the map also contains a :size key where the value is a vector with [col-count row-count]
 (defn parse-into-matrix-map
+  "creates a matrix as a map where keys are co-ordinates (vectors [x y]) and values are values"
   ([lines]
    (let [row-count (count lines) col-count (count (first lines))]
      (pairs-to-map
