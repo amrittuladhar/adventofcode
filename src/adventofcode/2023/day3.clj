@@ -75,17 +75,17 @@
   (let [neighbors (find-neighbors-schematic schematic [x y])
         possible-gears (filter #(= (schematic %) \*) neighbors)]
     (if (empty? possible-gears) nil
-                       [
-                        [[x y] (schematic [x y])]
-                        possible-gears
-                        ])))
+                                [
+                                 [[x y] (schematic [x y])]
+                                 possible-gears
+                                 ])))
 
 (defn find-part-numbers-with-gears [possible-gears]
   (let [possible-gears-map (reduce
-                (fn [map [part possible-gears]]
-                  (u/update-vals map possible-gears #(concat % [part])))
-                {}
-                possible-gears)
+                             (fn [map [part possible-gears]]
+                               (u/update-vals map possible-gears #(concat % [part])))
+                             {}
+                             possible-gears)
         gears (filter #(= (count (second %)) 2) possible-gears-map)
         part-numbers (map second gears)]
     part-numbers))
