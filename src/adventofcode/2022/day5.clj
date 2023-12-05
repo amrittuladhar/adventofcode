@@ -26,7 +26,6 @@
     (range 0 count)))
 
 (defn move-part-2 [state {from :from to :to count :count}]
-  ; (println state from to count)
   (-> state
       (update-in [to] #(concat (take count (state from)) %))
       (update-in [from] #(drop count %))))
