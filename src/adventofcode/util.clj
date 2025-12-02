@@ -1,5 +1,6 @@
 (ns adventofcode.util)
 (require '[clojure.string :as str]
+         '[clojure.math :as math]
          '[clojure.math.combinatorics :as combo])
 (use 'clj-stacktrace.core)
 
